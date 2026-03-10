@@ -43,8 +43,9 @@ namespace MealManagement.Controllers
         {
             var user = _context.Employees
                 .FirstOrDefault(x =>
-                    x.FullName.Trim().ToLower() == model.FullName.Trim().ToLower()
-                    && x.Password.Trim() == model.Password.Trim());
+                    x.Email != null &&
+                    x.Email.ToLower() == model.Email.ToLower() &&
+                    x.Password == model.Password);
 
             if (user == null)
                 return Unauthorized("Invalid Credentials");
