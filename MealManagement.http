@@ -1,0 +1,6 @@
+@MealManagement_HostAddress = https://your-render-url.onrender.com
+
+GET {{MealManagement_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
