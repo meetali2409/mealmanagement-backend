@@ -39,12 +39,11 @@ namespace MealManagement.Controllers
             return Ok("Registered Successfully");
         }
         [HttpPost("Login")]
-        public IActionResult Login(Employee model)
+        public IActionResult Login(LoginDto model)
         {
             var user = _context.Employees
                 .FirstOrDefault(x =>
-                    x.Email != null &&
-                    x.Email.ToLower() == model.Email.ToLower() &&
+                    x.Email == model.Email &&
                     x.Password == model.Password);
 
             if (user == null)
