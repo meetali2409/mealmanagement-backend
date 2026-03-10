@@ -16,7 +16,7 @@ namespace MealManagement.Controllers
             _context = context;
         }
         [HttpPost("Register")]
-        public IActionResult Register(Employee emp)
+        public IActionResult Register([FromBody] Employee emp)
         {
             if (string.IsNullOrWhiteSpace(emp.FullName) ||
                 string.IsNullOrWhiteSpace(emp.Password) ||

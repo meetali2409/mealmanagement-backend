@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MealManagement.Data;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddDbContext<MealManagerDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -15,13 +16,14 @@ builder.Services.AddDbContext<MealManagerDbContext>(options =>
         }
     ));
 
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
         policy =>
         {
             policy
-                .WithOrigins("https://mealmanagement-frontend.vercel.app")
+                .AllowAnyOrigin()   // easier for testing
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });
