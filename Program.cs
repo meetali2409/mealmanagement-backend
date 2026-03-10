@@ -16,14 +16,13 @@ builder.Services.AddDbContext<MealManagerDbContext>(options =>
         }
     ));
 
-// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
         policy =>
         {
             policy
-                .AllowAnyOrigin()   // easier for testing
+                .AllowAnyOrigin()
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });
@@ -40,5 +39,13 @@ app.UseCors("AllowFrontend");
 app.UseAuthorization();
 
 app.MapControllers();
+
+
+// ⭐ AUTO DATABASE MIGRATION
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<MealManagerDbContext>();
+    db.Database.Migrate();
+}
 
 app.Run();
