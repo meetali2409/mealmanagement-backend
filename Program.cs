@@ -40,12 +40,4 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-
-// ⭐ AUTO DATABASE MIGRATION
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<MealManagerDbContext>();
-    db.Database.Migrate();
-}
-
 app.Run();
