@@ -16,7 +16,7 @@ namespace MealManagement.Controllers
             _context = context;
         }
         [HttpPost("Register")]
-        public IActionResult Register(Employee emp)
+        public IActionResult Register([FromBody] Employee emp)
         {
             if (string.IsNullOrWhiteSpace(emp.FullName) ||
                 string.IsNullOrWhiteSpace(emp.Password) ||
@@ -32,24 +32,39 @@ namespace MealManagement.Controllers
             {
                 return BadRequest("Email already registered");
             }
+            if (string.IsNullOrEmpty(emp.Role))
+                emp.Role = "User";
 
             _context.Employees.Add(emp);
             _context.SaveChanges();
 
-            return Ok("Registered Successfully");
+            return Ok(new
+            {
+                message = "Registered Successfully",
+                emp.EmployeeId,
+                emp.FullName,
+                emp.Email,
+                emp.Role
+            });
         }
         [HttpPost("Login")]
-        public IActionResult Login(Employee model)
+        public IActionResult Login(LoginDto model)
         {
             var user = _context.Employees
                 .FirstOrDefault(x =>
-                    x.FullName.Trim().ToLower() == model.FullName.Trim().ToLower()
-                    && x.Password.Trim() == model.Password.Trim());
+                    x.Email == model.Email &&
+                    x.Password == model.Password);
 
             if (user == null)
                 return Unauthorized("Invalid Credentials");
 
-            return Ok(user);
+            return Ok(new
+            {
+                user.EmployeeId,
+                user.FullName,
+                user.Email,
+                user.Role  
+            });
         }
         [HttpPost("Add")]
         public IActionResult AddEmployee(EmployeeDto dto)
