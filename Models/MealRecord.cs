@@ -16,12 +16,12 @@ namespace MealManagement.Models
         public DateTime MealDate { get; set; }
 
         [ForeignKey("EmployeeId")]
-        public Employee Employee { get; set; }
+        public Employee ?Employee { get; set; }
 
         [ForeignKey("MealTypeId")]
-        public MealType MealType { get; set; }
+        public MealType ?MealType { get; set; }
 
         [ForeignKey("FoodId")]
-        public FoodItem Food { get; set; } // 🔥 THIS WAS MISSING
+        public FoodItem ?Food { get; set; } 
     }
 }

@@ -2,6 +2,6 @@
 {
     public class UpdateEmployeeDto
     {
-        public string FullName { get; set; }
+        public string ? FullName { get; set; }
     }
 }

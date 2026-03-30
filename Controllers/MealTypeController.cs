@@ -16,7 +16,6 @@ namespace MealManagement.Controllers
             _context = context;
         }
 
-        // ================= ADD =================
         [HttpPost("Add")]
         public async Task<IActionResult> AddMealType(MealTypeDto dto)
         {
@@ -42,7 +41,6 @@ namespace MealManagement.Controllers
             });
         }
 
-        // ================= GET ALL =================
         [HttpGet("All")]
         public async Task<IActionResult> GetAllMealTypes()
         {
@@ -51,7 +49,6 @@ namespace MealManagement.Controllers
             return Ok(meals); // frontend already expects array ✔
         }
 
-        // ================= UPDATE =================
         [HttpPut("Update/{id}")]
         public async Task<IActionResult> UpdateMealType(int id, MealTypeDto dto)
         {
@@ -78,7 +75,6 @@ namespace MealManagement.Controllers
             });
         }
 
-        // ================= DELETE =================
         [HttpDelete("Delete/{id}")]
         public async Task<IActionResult> DeleteMealType(int id)
         {

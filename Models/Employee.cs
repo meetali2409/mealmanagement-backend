@@ -10,10 +10,10 @@ namespace MealManagement.Models
         [Key]
         public int EmployeeId { get; set; }
 
-        public string FullName { get; set; }
-
+        public string ?FullName { get; set; }
+        [Required]
         public string Password { get; set; }
-
+        [Required]
         public string Email { get; set; }
 
         public string Role { get; set; } = "User";

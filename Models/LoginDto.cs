@@ -1,8 +1,12 @@
-﻿namespace MealManagement.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MealManagement.Models
 {
     public class LoginDto
     {
-        public string Email { get; set; }
+        [Required]
+        public string  Email { get; set; }
+        [Required]
         public string Password { get; set; }
     }
 }
