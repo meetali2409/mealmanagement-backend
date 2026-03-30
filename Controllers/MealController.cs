@@ -16,19 +16,22 @@ namespace MealManagement.Controllers
             _context = context;
         }
 
+        // ================= ADD MEAL =================
         [HttpPost("Add")]
         public async Task<IActionResult> AddMeal(AddMealDto request)
         {
             var today = DateTime.UtcNow.Date;
             var tomorrow = today.AddDays(1);
 
-            var existingMeal = await _context.MealRecords.AnyAsync(m =>
+            // 🔥 DUPLICATE CHECK (same meal + same food)
+            var exists = await _context.MealRecords.AnyAsync(m =>
                 m.EmployeeId == request.EmployeeId &&
                 m.MealTypeId == request.MealTypeId &&
+                m.FoodId == request.FoodId &&
                 m.MealDate >= today &&
                 m.MealDate < tomorrow);
 
-            if (existingMeal)
+            if (exists)
             {
                 return BadRequest(new { message = "Meal already taken today" });
             }
@@ -37,6 +40,7 @@ namespace MealManagement.Controllers
             {
                 EmployeeId = request.EmployeeId,
                 MealTypeId = request.MealTypeId,
+                FoodId = request.FoodId, // 🔥 IMPORTANT
                 MealDate = DateTime.UtcNow
             };
 
@@ -46,21 +50,7 @@ namespace MealManagement.Controllers
             return Ok(new { message = "Meal Added Successfully" });
         }
 
-        [HttpGet("CheckTodayMeal/{employeeId}/{mealTypeId}")]
-        public IActionResult CheckTodayMeal(int employeeId, int mealTypeId)
-        {
-            var today = DateTime.UtcNow.Date;
-            var tomorrow = today.AddDays(1);
-
-            bool exists = _context.MealRecords.Any(r =>
-                r.EmployeeId == employeeId &&
-                r.MealTypeId == mealTypeId &&
-                r.MealDate >= today &&
-                r.MealDate < tomorrow);
-
-            return Ok(exists);
-        }
-
+        // ================= TODAY PLATES =================
         [HttpGet("TodayTotalPlates")]
         public IActionResult TodayTotalPlates()
         {
@@ -73,6 +63,7 @@ namespace MealManagement.Controllers
             return Ok(total);
         }
 
+        // ================= TODAY AMOUNT =================
         [HttpGet("TodayTotalAmount")]
         public IActionResult TodayTotalAmount()
         {
@@ -89,12 +80,14 @@ namespace MealManagement.Controllers
             return Ok(total);
         }
 
+        // ================= HISTORY =================
         [HttpGet("History")]
         public IActionResult GetHistory(DateTime? fromDate, DateTime? toDate, string? name, int? mealTypeId)
         {
             var query = _context.MealRecords
                 .Include(r => r.MealType)
                 .Include(r => r.Employee)
+                .Include(r => r.Food) // 🔥 ADD THIS
                 .AsQueryable();
 
             if (fromDate.HasValue)
@@ -113,8 +106,9 @@ namespace MealManagement.Controllers
             {
                 fullName = r.Employee.FullName,
                 mealDate = r.MealDate,
-                mealName = r.MealType != null ? r.MealType.MealName : "",
-                fixedPrice = r.MealType != null ? r.MealType.FixedPrice : 0
+                mealName = r.MealType.MealName,
+                foodName = r.Food.FoodName, 
+                fixedPrice = r.MealType.FixedPrice
             }).ToList();
 
             var totalAmount = data.Sum(x => x.fixedPrice);

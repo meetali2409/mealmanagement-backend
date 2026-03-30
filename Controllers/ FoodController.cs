@@ -55,7 +55,15 @@ namespace MealManagement.Controllers
                 data = foods
             });
         }
+        [HttpGet("ByMeal/{mealTypeId}")]
+        public async Task<IActionResult> GetFoodByMeal(int mealTypeId)
+        {
+            var foods = await _context.FoodItems
+                .Where(f => f.MealTypeId == mealTypeId)
+                .ToListAsync();
 
+            return Ok(foods);
+        }
         [HttpPut("Update/{id}")]
         public async Task<IActionResult> UpdateFood(int id, FoodDto dto)
         {

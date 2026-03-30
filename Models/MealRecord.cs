@@ -6,11 +6,12 @@ namespace MealManagement.Models
     public class MealRecord
     {
         [Key]
-        public int RecordId { get; set; }
+        public int Id { get; set; }
 
         public int EmployeeId { get; set; }
-
         public int MealTypeId { get; set; }
+
+        public int FoodId { get; set; }
 
         public DateTime MealDate { get; set; }
 
@@ -19,5 +20,8 @@ namespace MealManagement.Models
 
         [ForeignKey("MealTypeId")]
         public MealType MealType { get; set; }
+
+        [ForeignKey("FoodId")]
+        public FoodItem Food { get; set; } // 🔥 THIS WAS MISSING
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MealManagement.Data;
 using MealManagement.Models;
 
@@ -15,55 +16,84 @@ namespace MealManagement.Controllers
             _context = context;
         }
 
+        // ================= ADD =================
         [HttpPost("Add")]
-        public IActionResult AddMealType(MealTypeDto dto)
+        public async Task<IActionResult> AddMealType(MealTypeDto dto)
         {
+            if (string.IsNullOrWhiteSpace(dto.MealName))
+                return BadRequest("Meal name is required");
+
+            if (dto.FixedPrice <= 0)
+                return BadRequest("Price must be greater than 0");
+
             var mealType = new MealType
             {
                 MealName = dto.MealName,
                 FixedPrice = dto.FixedPrice
             };
 
-            _context.MealTypes.Add(mealType);
-            _context.SaveChanges();
+            await _context.MealTypes.AddAsync(mealType);
+            await _context.SaveChangesAsync();
 
-            return Ok(mealType);
+            return Ok(new
+            {
+                message = "Meal type added successfully",
+                data = mealType
+            });
         }
 
+        // ================= GET ALL =================
         [HttpGet("All")]
-        public IActionResult GetAllMealTypes()
+        public async Task<IActionResult> GetAllMealTypes()
         {
-            return Ok(_context.MealTypes.ToList());
+            var meals = await _context.MealTypes.ToListAsync();
+
+            return Ok(meals); // frontend already expects array ✔
         }
 
+        // ================= UPDATE =================
         [HttpPut("Update/{id}")]
-        public IActionResult UpdateMealType(int id, MealType updatedMeal)
+        public async Task<IActionResult> UpdateMealType(int id, MealTypeDto dto)
         {
-            var meal = _context.MealTypes.Find(id);
+            var meal = await _context.MealTypes.FindAsync(id);
 
             if (meal == null)
                 return NotFound("Meal type not found");
 
-            meal.MealName = updatedMeal.MealName;
-            meal.FixedPrice = updatedMeal.FixedPrice;
+            if (string.IsNullOrWhiteSpace(dto.MealName))
+                return BadRequest("Meal name is required");
 
-            _context.SaveChanges();
+            if (dto.FixedPrice <= 0)
+                return BadRequest("Price must be greater than 0");
 
-            return Ok(meal);
+            meal.MealName = dto.MealName;
+            meal.FixedPrice = dto.FixedPrice;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Meal type updated successfully",
+                data = meal
+            });
         }
 
+        // ================= DELETE =================
         [HttpDelete("Delete/{id}")]
-        public IActionResult DeleteMealType(int id)
+        public async Task<IActionResult> DeleteMealType(int id)
         {
-            var meal = _context.MealTypes.Find(id);
+            var meal = await _context.MealTypes.FindAsync(id);
 
             if (meal == null)
                 return NotFound("Meal type not found");
 
             _context.MealTypes.Remove(meal);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            return Ok("Meal type deleted successfully");
+            return Ok(new
+            {
+                message = "Meal type deleted successfully"
+            });
         }
     }
 }

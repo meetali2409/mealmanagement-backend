@@ -19,7 +19,9 @@ namespace MealManagement.Migrations
                     EmployeeId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     FullName = table.Column<string>(type: "text", nullable: false),
-                    Password = table.Column<string>(type: "text", nullable: false)
+                    Password = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    Role = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -41,23 +43,50 @@ namespace MealManagement.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "FoodItems",
+                columns: table => new
+                {
+                    FoodId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    FoodName = table.Column<string>(type: "text", nullable: false),
+                    MealTypeId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FoodItems", x => x.FoodId);
+                    table.ForeignKey(
+                        name: "FK_FoodItems_MealTypes_MealTypeId",
+                        column: x => x.MealTypeId,
+                        principalTable: "MealTypes",
+                        principalColumn: "MealTypeId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MealRecords",
                 columns: table => new
                 {
-                    RecordId = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     EmployeeId = table.Column<int>(type: "integer", nullable: false),
                     MealTypeId = table.Column<int>(type: "integer", nullable: false),
+                    FoodId = table.Column<int>(type: "integer", nullable: false),
                     MealDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MealRecords", x => x.RecordId);
+                    table.PrimaryKey("PK_MealRecords", x => x.Id);
                     table.ForeignKey(
                         name: "FK_MealRecords_Employees_EmployeeId",
                         column: x => x.EmployeeId,
                         principalTable: "Employees",
                         principalColumn: "EmployeeId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MealRecords_FoodItems_FoodId",
+                        column: x => x.FoodId,
+                        principalTable: "FoodItems",
+                        principalColumn: "FoodId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_MealRecords_MealTypes_MealTypeId",
@@ -68,10 +97,25 @@ namespace MealManagement.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_MealRecords_EmployeeId_MealTypeId_MealDate",
-                table: "MealRecords",
-                columns: new[] { "EmployeeId", "MealTypeId", "MealDate" },
+                name: "IX_Employees_Email",
+                table: "Employees",
+                column: "Email",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FoodItems_MealTypeId",
+                table: "FoodItems",
+                column: "MealTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MealRecords_EmployeeId_MealTypeId",
+                table: "MealRecords",
+                columns: new[] { "EmployeeId", "MealTypeId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MealRecords_FoodId",
+                table: "MealRecords",
+                column: "FoodId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MealRecords_MealTypeId",
@@ -87,6 +131,9 @@ namespace MealManagement.Migrations
 
             migrationBuilder.DropTable(
                 name: "Employees");
+
+            migrationBuilder.DropTable(
+                name: "FoodItems");
 
             migrationBuilder.DropTable(
                 name: "MealTypes");

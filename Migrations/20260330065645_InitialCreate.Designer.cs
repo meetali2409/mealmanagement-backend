@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MealManagement.Migrations
 {
     [DbContext(typeof(MealManagerDbContext))]
-    [Migration("20260325113551_AddRole")]
-    partial class AddRole
+    [Migration("20260330065645_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,15 +57,40 @@ namespace MealManagement.Migrations
                     b.ToTable("Employees");
                 });
 
-            modelBuilder.Entity("MealManagement.Models.MealRecord", b =>
+            modelBuilder.Entity("MealManagement.Models.FoodItem", b =>
                 {
-                    b.Property<int>("RecordId")
+                    b.Property<int>("FoodId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("RecordId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("FoodId"));
+
+                    b.Property<string>("FoodName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("MealTypeId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("FoodId");
+
+                    b.HasIndex("MealTypeId");
+
+                    b.ToTable("FoodItems");
+                });
+
+            modelBuilder.Entity("MealManagement.Models.MealRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("EmployeeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("FoodId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("MealDate")
@@ -74,7 +99,9 @@ namespace MealManagement.Migrations
                     b.Property<int>("MealTypeId")
                         .HasColumnType("integer");
 
-                    b.HasKey("RecordId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("FoodId");
 
                     b.HasIndex("MealTypeId");
 
@@ -104,11 +131,28 @@ namespace MealManagement.Migrations
                     b.ToTable("MealTypes");
                 });
 
+            modelBuilder.Entity("MealManagement.Models.FoodItem", b =>
+                {
+                    b.HasOne("MealManagement.Models.MealType", "MealType")
+                        .WithMany()
+                        .HasForeignKey("MealTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MealType");
+                });
+
             modelBuilder.Entity("MealManagement.Models.MealRecord", b =>
                 {
                     b.HasOne("MealManagement.Models.Employee", "Employee")
                         .WithMany()
                         .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MealManagement.Models.FoodItem", "Food")
+                        .WithMany()
+                        .HasForeignKey("FoodId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -119,6 +163,8 @@ namespace MealManagement.Migrations
                         .IsRequired();
 
                     b.Navigation("Employee");
+
+                    b.Navigation("Food");
 
                     b.Navigation("MealType");
                 });
