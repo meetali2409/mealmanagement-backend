@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MealManagement.Data;
 using MealManagement.Models;
 
@@ -14,20 +15,25 @@ namespace MealManagement.Controllers
         {
             _context = context;
         }
-
         [HttpPost("Add")]
-        public IActionResult AddFood(FoodDto dto)
+        public async Task<IActionResult> AddFood(FoodDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.FoodName))
                 return BadRequest("Food name is required");
 
+            var mealType = await _context.MealTypes.FindAsync(dto.MealTypeId);
+
+            if (mealType == null)
+                return BadRequest("Invalid Meal Type");
+
             var food = new FoodItem
             {
                 FoodName = dto.FoodName,
+                MealTypeId = dto.MealTypeId
             };
 
-            _context.FoodItems.Add(food);
-            _context.SaveChanges();
+            await _context.FoodItems.AddAsync(food);
+            await _context.SaveChangesAsync();
 
             return Ok(new
             {
@@ -37,9 +43,11 @@ namespace MealManagement.Controllers
         }
 
         [HttpGet("All")]
-        public IActionResult GetAllFoods()
+        public async Task<IActionResult> GetAllFoods()
         {
-            var foods = _context.FoodItems.ToList();
+            var foods = await _context.FoodItems
+                .Include(f => f.MealType)
+                .ToListAsync();
 
             return Ok(new
             {
@@ -49,9 +57,9 @@ namespace MealManagement.Controllers
         }
 
         [HttpPut("Update/{id}")]
-        public IActionResult UpdateFood(int id, FoodDto dto)
+        public async Task<IActionResult> UpdateFood(int id, FoodDto dto)
         {
-            var food = _context.FoodItems.Find(id);
+            var food = await _context.FoodItems.FindAsync(id);
 
             if (food == null)
                 return NotFound("Food not found");
@@ -60,8 +68,9 @@ namespace MealManagement.Controllers
                 return BadRequest("Food name is required");
 
             food.FoodName = dto.FoodName;
+            food.MealTypeId = dto.MealTypeId;
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Ok(new
             {
@@ -69,17 +78,16 @@ namespace MealManagement.Controllers
                 data = food
             });
         }
-
         [HttpDelete("Delete/{id}")]
-        public IActionResult DeleteFood(int id)
+        public async Task<IActionResult> DeleteFood(int id)
         {
-            var food = _context.FoodItems.Find(id);
+            var food = await _context.FoodItems.FindAsync(id);
 
             if (food == null)
                 return NotFound("Food not found");
 
             _context.FoodItems.Remove(food);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Ok(new
             {

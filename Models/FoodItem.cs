@@ -1,17 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MealManagement.Models;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace MealManagement.Models
+public class FoodItem
 {
-    public class FoodItem
-    {
-        [Key]
-        public int FoodId { get; set; }
+    [Key]
+    public int FoodId { get; set; }
 
-        public string FoodName { get; set; }
+    public string FoodName { get; set; }
 
-        public int MealTypeId { get; set; }
+    public int MealTypeId { get; set; }
 
-        public MealType MealType { get; set; }
-    }
+    [ForeignKey("MealTypeId")]
+    public MealType MealType { get; set; }
 }
