@@ -21,10 +21,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy
-                .AllowAnyOrigin()
-                .AllowAnyHeader()
-                .AllowAnyMethod();
+            policy.WithOrigins("https://mealmanagement-frontend.vercel.app")
+      .AllowAnyHeader()
+      .AllowAnyMethod();
+ 
         });
 });
 
