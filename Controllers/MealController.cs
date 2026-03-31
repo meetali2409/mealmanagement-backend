@@ -75,7 +75,7 @@ namespace MealManagement.Controllers
             return Ok(total);
         }
 
-    
+
         [HttpGet("History")]
         public IActionResult GetHistory(DateTime? fromDate, DateTime? toDate, string? name, int? mealTypeId)
         {
@@ -84,10 +84,9 @@ namespace MealManagement.Controllers
                 var query = _context.MealRecords
                     .Include(r => r.MealType)
                     .Include(r => r.Employee)
-                    .Include(r => r.FoodItem)   
+                    .Include(r => r.FoodItem)
                     .AsQueryable();
 
-           
                 if (fromDate.HasValue)
                 {
                     var from = fromDate.Value.Date;
@@ -115,11 +114,19 @@ namespace MealManagement.Controllers
                     fullName = r.Employee != null ? r.Employee.FullName : "",
                     mealDate = r.MealDate,
                     mealName = r.MealType != null ? r.MealType.MealName : "",
-                    foodName = r.FoodItem != null ? r.FoodItem.FoodName : "",  
-                    fixedPrice = r.MealType != null ? r.MealType.FixedPrice : 0
+                    foodName = r.FoodItem != null ? r.FoodItem.FoodName : "",
+                    fixedPrice = r.MealType != null ? r.MealType.FixedPrice : 0,
+                    employeeId = r.EmployeeId,
+                    mealTypeId = r.MealTypeId
                 }).ToList();
-
-                var totalAmount = data.Sum(x => x.fixedPrice);
+                var totalAmount = data
+                    .GroupBy(x => new
+                    {
+                        x.employeeId,
+                        Date = x.mealDate.Date,
+                        x.mealTypeId
+                    })
+                    .Sum(g => g.First().fixedPrice);
 
                 return Ok(new
                 {
