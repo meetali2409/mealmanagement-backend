@@ -38,7 +38,7 @@ namespace MealManagement.Controllers
             {
                 EmployeeId = request.EmployeeId,
                 MealTypeId = request.MealTypeId,
-                FoodId = request.FoodId, 
+                FoodId = request.FoodId,
                 MealDate = DateTime.UtcNow
             };
 
@@ -60,22 +60,22 @@ namespace MealManagement.Controllers
             return Ok(total);
         }
 
+
         [HttpGet("TodayTotalAmount")]
         public IActionResult TodayTotalAmount()
         {
             var today = DateTime.UtcNow.Date;
             var tomorrow = today.AddDays(1);
 
-            var records = _context.MealRecords
+            var total = _context.MealRecords
                 .Include(r => r.MealType)
                 .Where(r => r.MealDate >= today && r.MealDate < tomorrow)
-                .ToList();
-
-            var total = records.Sum(r => r.MealType != null ? r.MealType.FixedPrice : 0);
+                .Sum(r => r.MealType != null ? r.MealType.FixedPrice : 0);
 
             return Ok(total);
         }
 
+    
         [HttpGet("History")]
         public IActionResult GetHistory(DateTime? fromDate, DateTime? toDate, string? name, int? mealTypeId)
         {
@@ -84,8 +84,10 @@ namespace MealManagement.Controllers
                 var query = _context.MealRecords
                     .Include(r => r.MealType)
                     .Include(r => r.Employee)
+                    .Include(r => r.FoodItem)   
                     .AsQueryable();
 
+           
                 if (fromDate.HasValue)
                 {
                     var from = fromDate.Value.Date;
@@ -113,6 +115,7 @@ namespace MealManagement.Controllers
                     fullName = r.Employee != null ? r.Employee.FullName : "",
                     mealDate = r.MealDate,
                     mealName = r.MealType != null ? r.MealType.MealName : "",
+                    foodName = r.FoodItem != null ? r.FoodItem.FoodName : "",  
                     fixedPrice = r.MealType != null ? r.MealType.FixedPrice : 0
                 }).ToList();
 
@@ -126,7 +129,7 @@ namespace MealManagement.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message); 
+                return StatusCode(500, ex.Message);
             }
         }
     }
