@@ -111,6 +111,7 @@ namespace MealManagement.Controllers
 
                 var data = query.Select(r => new
                 {
+                    id = r.Id,
                     fullName = r.Employee != null ? r.Employee.FullName : "",
                     mealDate = r.MealDate,
                     mealName = r.MealType != null ? r.MealType.MealName : "",
@@ -138,6 +139,33 @@ namespace MealManagement.Controllers
             {
                 return StatusCode(500, ex.Message);
             }
+        }
+        [HttpDelete("Delete/{id}")]
+        public async Task<IActionResult> DeleteMeal(int id)
+        {
+            var meal = await _context.MealRecords.FindAsync(id);
+
+            if (meal == null)
+                return NotFound("Meal not found");
+
+            _context.MealRecords.Remove(meal);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Meal deleted successfully" });
+        }
+        [HttpPut("Update/{id}")]
+        public async Task<IActionResult> UpdateMeal(int id, AddMealDto request)
+        {
+            var meal = await _context.MealRecords.FindAsync(id);
+
+            if (meal == null)
+                return NotFound("Meal not found");
+
+            meal.MealTypeId = request.MealTypeId;
+            meal.FoodId = request.FoodId;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Meal Updated Successfully" });
         }
     }
 }
