@@ -154,22 +154,35 @@ namespace MealManagement.Controllers
             return Ok(new { message = "Meal deleted successfully" });
         }
         [HttpDelete("DeleteByGroup")]
-        public async Task<IActionResult> DeleteByGroup(int employeeId, int mealTypeId, DateTime date)
+        public async Task<IActionResult> DeleteByGroup(int employeeId, int mealTypeId, string date)
         {
-            var nextDay = date.Date.AddDays(1);
+            try
+            {
+                var parsedDate = DateTime.Parse(date);
+                var start = parsedDate.Date;
+                var end = start.AddDays(1);
 
-            var meals = _context.MealRecords
-                .Where(m =>
-                    m.EmployeeId == employeeId &&
-                    m.MealTypeId == mealTypeId &&
-                    m.MealDate >= date.Date &&
-                    m.MealDate < nextDay
-                );
+                var meals = await _context.MealRecords
+                    .Where(m =>
+                        m.EmployeeId == employeeId &&
+                        m.MealTypeId == mealTypeId &&
+                        m.MealDate >= start &&
+                        m.MealDate < end
+                    )
+                    .ToListAsync();
 
-            _context.MealRecords.RemoveRange(meals);
-            await _context.SaveChangesAsync();
+                if (!meals.Any())
+                    return NotFound("No meals found");
 
-            return Ok(new { message = "Meal group deleted" });
+                _context.MealRecords.RemoveRange(meals);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
         [HttpPut("Update/{id}")]
         public async Task<IActionResult> UpdateMeal(int id, AddMealDto request)

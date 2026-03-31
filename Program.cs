@@ -16,15 +16,15 @@ builder.Services.AddDbContext<MealManagerDbContext>(options =>
         }
     ));
 
+// 🔥 FIXED CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend",
+    options.AddPolicy("AllowAll",
         policy =>
         {
-            policy.WithOrigins("https://mealmanagement-frontend.vercel.app")
-      .AllowAnyHeader()
-      .AllowAnyMethod();
- 
+            policy.AllowAnyOrigin()   // ✅ allow all (important)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
         });
 });
 
@@ -33,8 +33,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
 app.UseHttpsRedirection();
-app.UseCors("AllowFrontend");
+
+app.UseCors("AllowAll");
 
 app.UseAuthorization();
 
