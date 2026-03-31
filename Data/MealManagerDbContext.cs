@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MealManagement.Models;
-
 namespace MealManagement.Data
 {
     public class MealManagerDbContext : DbContext
@@ -22,7 +21,13 @@ namespace MealManagement.Data
 
             modelBuilder.Entity<MealRecord>()
                 .HasIndex(m => new { m.EmployeeId, m.MealTypeId });
-        }
+
+            modelBuilder.Entity<MealRecord>()
+                .HasOne(m => m.FoodItem)
+                .WithMany()
+                .HasForeignKey(m => m.FoodId);
+       
+    }
 
     }
 }

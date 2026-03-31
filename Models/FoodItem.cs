@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MealManagement.Models
 {
@@ -8,7 +7,7 @@ namespace MealManagement.Models
         [Key]
         public int FoodId { get; set; }
 
-        public string FoodName { get; set; } = string.Empty; 
+        public string FoodName { get; set; } = string.Empty;
 
         public int MealTypeId { get; set; }
 
