@@ -41,21 +41,11 @@ namespace MealManagement.Controllers
                 data = food
             });
         }
+
         [HttpGet("All")]
         public async Task<IActionResult> GetAllFoods()
         {
-            var foods = await _context.FoodItems
-                .Select(f => new
-                {
-                    f.FoodId,
-                    f.FoodName,
-                    f.MealTypeId,
-                    MealName = _context.MealTypes
-                        .Where(m => m.MealTypeId == f.MealTypeId)
-                        .Select(m => m.MealName)
-                        .FirstOrDefault()
-                })
-                .ToListAsync();
+            var foods = await _context.FoodItems.ToListAsync();
 
             return Ok(new
             {
