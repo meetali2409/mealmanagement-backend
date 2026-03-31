@@ -153,6 +153,24 @@ namespace MealManagement.Controllers
 
             return Ok(new { message = "Meal deleted successfully" });
         }
+        [HttpDelete("DeleteByGroup")]
+        public async Task<IActionResult> DeleteByGroup(int employeeId, int mealTypeId, DateTime date)
+        {
+            var nextDay = date.Date.AddDays(1);
+
+            var meals = _context.MealRecords
+                .Where(m =>
+                    m.EmployeeId == employeeId &&
+                    m.MealTypeId == mealTypeId &&
+                    m.MealDate >= date.Date &&
+                    m.MealDate < nextDay
+                );
+
+            _context.MealRecords.RemoveRange(meals);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Meal group deleted" });
+        }
         [HttpPut("Update/{id}")]
         public async Task<IActionResult> UpdateMeal(int id, AddMealDto request)
         {
