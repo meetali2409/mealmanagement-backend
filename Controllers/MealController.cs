@@ -158,7 +158,14 @@ namespace MealManagement.Controllers
         {
             try
             {
-                var parsedDate = DateTime.Parse(date);
+                if (string.IsNullOrEmpty(date))
+                    return BadRequest("Date is required");
+
+                DateTime parsedDate;
+
+                if (!DateTime.TryParse(date, out parsedDate))
+                    return BadRequest("Invalid date format");
+
                 var start = parsedDate.Date;
                 var end = start.AddDays(1);
 
