@@ -45,13 +45,20 @@ namespace MealManagement.Controllers
         [HttpGet("All")]
         public async Task<IActionResult> GetAllFoods()
         {
-            var foods = await _context.FoodItems.ToListAsync();
-
-            return Ok(new
+            try
             {
-                message = "Food list fetched",
-                data = foods
-            });
+                var foods = await _context.FoodItems.ToListAsync();
+
+                return Ok(new
+                {
+                    message = "Food list fetched",
+                    data = foods
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message); 
+            }
         }
         [HttpGet("ByMeal/{mealTypeId}")]
         public async Task<IActionResult> GetFoodByMeal(int mealTypeId)

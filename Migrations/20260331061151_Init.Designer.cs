@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MealManagement.Migrations
 {
     [DbContext(typeof(MealManagerDbContext))]
-    [Migration("20260331054521_AddFoodToMealRecord")]
-    partial class AddFoodToMealRecord
+    [Migration("20260331061151_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
