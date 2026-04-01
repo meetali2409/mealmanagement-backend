@@ -16,14 +16,12 @@ namespace MealManagement.Controllers
             _context = context;
         }
 
-        // 🔥 ADD BULK (ONE MEAL TYPE MANY FOODS)
         [HttpPost("AddBulk")]
         public async Task<IActionResult> AddBulk(AddBulkMealDto dto)
         {
             var today = DateTime.UtcNow.Date;
             var tomorrow = today.AddDays(1);
 
-            // ✅ Check if already added same meal type
             var exists = await _context.MealRecords.AnyAsync(m =>
                 m.EmployeeId == dto.EmployeeId &&
                 m.MealTypeId == dto.MealTypeId &&
@@ -35,7 +33,6 @@ namespace MealManagement.Controllers
                 return BadRequest(new { message = "Meal already taken today" });
             }
 
-            // ✅ Add multiple food items but ONE MEAL GROUP
             foreach (var foodId in dto.FoodIds)
             {
                 _context.MealRecords.Add(new MealRecord
@@ -52,7 +49,6 @@ namespace MealManagement.Controllers
             return Ok(new { message = "Meal Added Successfully" });
         }
 
-        // 🔥 FIXED PLATE COUNT
         [HttpGet("TodayTotalPlates")]
         public IActionResult TodayTotalPlates()
         {
@@ -68,7 +64,6 @@ namespace MealManagement.Controllers
             return Ok(total);
         }
 
-        // 🔥 TOTAL AMOUNT (ONE MEAL = ONE PRICE)
         [HttpGet("TodayTotalAmount")]
         public IActionResult TodayTotalAmount()
         {
@@ -85,7 +80,6 @@ namespace MealManagement.Controllers
             return Ok(total);
         }
 
-        // 🔥 HISTORY FIXED (GROUPED)
         [HttpGet("History")]
         public IActionResult GetHistory(DateTime? fromDate, DateTime? toDate, string? name, int? mealTypeId)
         {
@@ -119,7 +113,7 @@ namespace MealManagement.Controllers
                     query = query.Where(r => r.MealTypeId == mealTypeId.Value);
                 }
 
-                // 🔥 GROUPING (IMPORTANT)
+        
                 var data = query
                     .AsEnumerable()
                     .GroupBy(r => new
