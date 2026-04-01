@@ -43,23 +43,19 @@ namespace MealManagement.Controllers
 
             return Ok("Meal Added");
         }
-
         [HttpGet("TodayTotalPlates")]
         public IActionResult TodayTotalPlates()
         {
             var today = DateTime.UtcNow.Date;
             var tomorrow = today.AddDays(1);
 
-            var records = _context.MealRecords
+            var totalPlates = _context.MealRecords
                 .Where(r => r.MealDate >= today && r.MealDate < tomorrow)
-                .ToList();
-
-            var totalPlates = records
                 .GroupBy(r => new
                 {
                     r.EmployeeId,
-                    Date = r.MealDate.Date,
-                    r.MealTypeId
+                    r.MealTypeId,
+                    Date = r.MealDate.Date
                 })
                 .Count();
 
