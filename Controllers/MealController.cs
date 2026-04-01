@@ -161,13 +161,17 @@ namespace MealManagement.Controllers
 
             return Ok(new { message = "Meal deleted successfully" });
         }
-
         [HttpDelete("DeleteByGroup")]
         public async Task<IActionResult> DeleteByGroup(int employeeId, int mealTypeId, string date)
         {
             try
             {
-                DateTime parsedDate = DateTime.Parse(date);
+                if (string.IsNullOrEmpty(date))
+                    return BadRequest("Date is required");
+
+                if (!DateTime.TryParse(date, out DateTime parsedDate))
+                    return BadRequest("Invalid date format");
+
                 var start = parsedDate.Date;
                 var end = start.AddDays(1);
 
@@ -180,6 +184,9 @@ namespace MealManagement.Controllers
                     )
                     .ToListAsync();
 
+                if (!meals.Any())
+                    return NotFound("No meals found");
+
                 _context.MealRecords.RemoveRange(meals);
                 await _context.SaveChangesAsync();
 
@@ -190,7 +197,6 @@ namespace MealManagement.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
         [HttpPut("UpdateGroup")]
         public async Task<IActionResult> UpdateGroup(int employeeId, int mealTypeId, string date, int foodId)
         {
