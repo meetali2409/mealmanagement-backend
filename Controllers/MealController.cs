@@ -29,9 +29,7 @@ namespace MealManagement.Controllers
                 m.MealDate < tomorrow);
 
             if (exists)
-            {
-                return BadRequest(new { message = "Meal already added for today" });
-            }
+                return BadRequest("Meal already added");
 
             var meal = new MealRecord
             {
@@ -40,11 +38,10 @@ namespace MealManagement.Controllers
                 FoodId = request.FoodId,
                 MealDate = DateTime.UtcNow
             };
-
             _context.MealRecords.Add(meal);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Meal Added Successfully" });
+            return Ok("Meal Added");
         }
 
         [HttpGet("TodayTotalPlates")]
@@ -53,10 +50,20 @@ namespace MealManagement.Controllers
             var today = DateTime.UtcNow.Date;
             var tomorrow = today.AddDays(1);
 
-            var total = _context.MealRecords
-                .Count(r => r.MealDate >= today && r.MealDate < tomorrow);
+            var records = _context.MealRecords
+                .Where(r => r.MealDate >= today && r.MealDate < tomorrow)
+                .ToList();
 
-            return Ok(total);
+            var totalPlates = records
+                .GroupBy(r => new
+                {
+                    r.EmployeeId,
+                    Date = r.MealDate.Date,
+                    r.MealTypeId
+                })
+                .Count();
+
+            return Ok(totalPlates);
         }
 
         [HttpGet("TodayTotalAmount")]
