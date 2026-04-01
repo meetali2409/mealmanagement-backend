@@ -25,13 +25,12 @@ namespace MealManagement.Controllers
             var exists = await _context.MealRecords.AnyAsync(m =>
                 m.EmployeeId == request.EmployeeId &&
                 m.MealTypeId == request.MealTypeId &&
-                m.FoodId == request.FoodId &&
                 m.MealDate >= today &&
                 m.MealDate < tomorrow);
 
             if (exists)
             {
-                return BadRequest(new { message = "Meal already taken today" });
+                return BadRequest(new { message = "Meal already added for today" });
             }
 
             var meal = new MealRecord
@@ -60,21 +59,28 @@ namespace MealManagement.Controllers
             return Ok(total);
         }
 
-
         [HttpGet("TodayTotalAmount")]
         public IActionResult TodayTotalAmount()
         {
             var today = DateTime.UtcNow.Date;
             var tomorrow = today.AddDays(1);
 
-            var total = _context.MealRecords
+            var records = _context.MealRecords
                 .Include(r => r.MealType)
                 .Where(r => r.MealDate >= today && r.MealDate < tomorrow)
-                .Sum(r => r.MealType != null ? r.MealType.FixedPrice : 0);
+                .ToList();
+
+            var total = records
+                .GroupBy(r => new
+                {
+                    r.EmployeeId,
+                    Date = r.MealDate.Date,
+                    r.MealTypeId
+                })
+                .Sum(g => g.First().MealType != null ? g.First().MealType.FixedPrice : 0);
 
             return Ok(total);
         }
-
 
         [HttpGet("History")]
         public IActionResult GetHistory(DateTime? fromDate, DateTime? toDate, string? name, int? mealTypeId)
@@ -120,6 +126,7 @@ namespace MealManagement.Controllers
                     employeeId = r.EmployeeId,
                     mealTypeId = r.MealTypeId
                 }).ToList();
+
                 var totalAmount = data
                     .GroupBy(x => new
                     {
@@ -140,6 +147,7 @@ namespace MealManagement.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
         [HttpDelete("Delete/{id}")]
         public async Task<IActionResult> DeleteMeal(int id)
         {
@@ -153,19 +161,13 @@ namespace MealManagement.Controllers
 
             return Ok(new { message = "Meal deleted successfully" });
         }
+
         [HttpDelete("DeleteByGroup")]
         public async Task<IActionResult> DeleteByGroup(int employeeId, int mealTypeId, string date)
         {
             try
             {
-                if (string.IsNullOrEmpty(date))
-                    return BadRequest("Date is required");
-
-                DateTime parsedDate;
-
-                if (!DateTime.TryParse(date, out parsedDate))
-                    return BadRequest("Invalid date format");
-
+                DateTime parsedDate = DateTime.Parse(date);
                 var start = parsedDate.Date;
                 var end = start.AddDays(1);
 
@@ -178,9 +180,6 @@ namespace MealManagement.Controllers
                     )
                     .ToListAsync();
 
-                if (!meals.Any())
-                    return NotFound("No meals found");
-
                 _context.MealRecords.RemoveRange(meals);
                 await _context.SaveChangesAsync();
 
@@ -191,19 +190,45 @@ namespace MealManagement.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-        [HttpPut("Update/{id}")]
-        public async Task<IActionResult> UpdateMeal(int id, AddMealDto request)
+
+        [HttpPut("UpdateGroup")]
+        public async Task<IActionResult> UpdateGroup(int employeeId, int mealTypeId, string date, int foodId)
         {
-            var meal = await _context.MealRecords.FindAsync(id);
+            try
+            {
+                DateTime parsedDate = DateTime.Parse(date);
+                var start = parsedDate.Date;
+                var end = start.AddDays(1);
 
-            if (meal == null)
-                return NotFound("Meal not found");
+                var meals = await _context.MealRecords
+                    .Where(m =>
+                        m.EmployeeId == employeeId &&
+                        m.MealTypeId == mealTypeId &&
+                        m.MealDate >= start &&
+                        m.MealDate < end
+                    )
+                    .ToListAsync();
 
-            meal.MealTypeId = request.MealTypeId;
-            meal.FoodId = request.FoodId;
-            await _context.SaveChangesAsync();
+                _context.MealRecords.RemoveRange(meals);
+                await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Meal Updated Successfully" });
+                var newMeal = new MealRecord
+                {
+                    EmployeeId = employeeId,
+                    MealTypeId = mealTypeId,
+                    FoodId = foodId,
+                    MealDate = DateTime.UtcNow
+                };
+
+                _context.MealRecords.Add(newMeal);
+                await _context.SaveChangesAsync();
+
+                return Ok("Updated successfully");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }
