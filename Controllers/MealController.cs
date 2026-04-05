@@ -33,17 +33,17 @@ namespace MealManagement.Controllers
                 return BadRequest(new { message = "Meal already taken today" });
             }
 
-            foreach (var foodId in dto.FoodIds)
+            var meal = new MealRecord
             {
-                _context.MealRecords.Add(new MealRecord
-                {
-                    EmployeeId = dto.EmployeeId,
-                    MealTypeId = dto.MealTypeId,
-                    FoodId = foodId,
-                    MealDate = DateTime.UtcNow
-                });
-            }
+                EmployeeId = dto.EmployeeId,
+                MealTypeId = dto.MealTypeId,
+                MealDate = DateTime.UtcNow,
 
+   
+                FoodName = string.Join(",", dto.FoodIds)
+            };
+
+            _context.MealRecords.Add(meal);
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Meal Added Successfully" });
@@ -64,6 +64,7 @@ namespace MealManagement.Controllers
             return Ok(total);
         }
 
+        // ✅ TOTAL AMOUNT (FIXED PRICE)
         [HttpGet("TodayTotalAmount")]
         public IActionResult TodayTotalAmount()
         {
@@ -80,6 +81,7 @@ namespace MealManagement.Controllers
             return Ok(total);
         }
 
+
         [HttpGet("History")]
         public IActionResult GetHistory(DateTime? fromDate, DateTime? toDate, string? name, int? mealTypeId)
         {
@@ -88,7 +90,6 @@ namespace MealManagement.Controllers
                 var query = _context.MealRecords
                     .Include(r => r.MealType)
                     .Include(r => r.Employee)
-                    .Include(r => r.FoodItem)
                     .AsQueryable();
 
                 if (fromDate.HasValue)
@@ -113,7 +114,6 @@ namespace MealManagement.Controllers
                     query = query.Where(r => r.MealTypeId == mealTypeId.Value);
                 }
 
-        
                 var data = query
                     .AsEnumerable()
                     .GroupBy(r => new
@@ -121,14 +121,23 @@ namespace MealManagement.Controllers
                         r.Employee.FullName,
                         Date = r.MealDate.Date,
                         r.MealType.MealName,
-                        r.MealType.FixedPrice
+                        r.MealType.FixedPrice,
+                        r.EmployeeId,
+                        r.MealTypeId
                     })
                     .Select(g => new
                     {
+                        employeeId = g.Key.EmployeeId,
+                        mealTypeId = g.Key.MealTypeId,
                         fullName = g.Key.FullName,
                         mealDate = g.Key.Date,
                         mealName = g.Key.MealName,
-                        foodNames = g.Select(x => x.FoodItem.FoodName).ToList(),
+
+                        foodNames = g
+                            .SelectMany(x => x.FoodName
+                                .Split(',', StringSplitOptions.RemoveEmptyEntries))
+                            .ToList(),
+
                         fixedPrice = g.Key.FixedPrice
                     })
                     .ToList();
@@ -145,6 +154,53 @@ namespace MealManagement.Controllers
             {
                 return StatusCode(500, ex.Message);
             }
+        }
+
+        [HttpDelete("Delete/{employeeId}/{mealTypeId}")]
+        public async Task<IActionResult> Delete(int employeeId, int mealTypeId)
+        {
+            var today = DateTime.UtcNow.Date;
+            var tomorrow = today.AddDays(1);
+
+            var records = await _context.MealRecords
+                .Where(x =>
+                    x.EmployeeId == employeeId &&
+                    x.MealTypeId == mealTypeId &&
+                    x.MealDate >= today &&
+                    x.MealDate < tomorrow)
+                .ToListAsync();
+
+            if (!records.Any())
+                return NotFound();
+
+            _context.MealRecords.RemoveRange(records);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Deleted Successfully" });
+        }
+
+        // ✅ EDIT (UPDATE FOOD ITEMS)
+        [HttpPut("Update")]
+        public async Task<IActionResult> Update(AddBulkMealDto dto)
+        {
+            var today = DateTime.UtcNow.Date;
+            var tomorrow = today.AddDays(1);
+
+            var record = await _context.MealRecords
+                .FirstOrDefaultAsync(x =>
+                    x.EmployeeId == dto.EmployeeId &&
+                    x.MealTypeId == dto.MealTypeId &&
+                    x.MealDate >= today &&
+                    x.MealDate < tomorrow);
+
+            if (record == null)
+                return NotFound();
+
+            record.FoodName = string.Join(",", dto.FoodIds);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Updated Successfully" });
         }
     }
 }
