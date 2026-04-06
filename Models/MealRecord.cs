@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -12,11 +11,14 @@ namespace MealManagement.Models
         public int EmployeeId { get; set; }
         public int MealTypeId { get; set; }
 
-        public DateTime MealDate { get; set; }
+        public int FoodId { get; set; }  
 
-        public string FoodName { get; set; } = "";
+        public DateTime MealDate { get; set; }
 
         public Employee? Employee { get; set; }
         public MealType? MealType { get; set; }
+
+        [ForeignKey("FoodId")]
+        public FoodItem? FoodItem { get; set; } 
     }
 }
