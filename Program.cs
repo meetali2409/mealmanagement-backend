@@ -16,13 +16,12 @@ builder.Services.AddDbContext<MealManagerDbContext>(options =>
         }
     ));
 
-// 🔥 FIXED CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
         policy =>
         {
-            policy.AllowAnyOrigin()   // ✅ allow all (important)
+            policy.AllowAnyOrigin()   
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -33,7 +32,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<MealManagerDbContext>();
+    db.Database.Migrate();
+}
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
