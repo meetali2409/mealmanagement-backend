@@ -16,41 +16,54 @@ namespace MealManagement.Controllers
             _context = context;
         }
 
-        // ✅ ADD BULK (MAIN FIX)
         [HttpPost("AddBulk")]
         public async Task<IActionResult> AddBulk(AddBulkMealDto dto)
         {
-            var today = DateTime.Now.Date; // ✅ FIXED
-            var tomorrow = today.AddDays(1);
-
-            var exists = await _context.MealRecords.AnyAsync(m =>
-                m.EmployeeId == dto.EmployeeId &&
-                m.MealTypeId == dto.MealTypeId &&
-                m.MealDate >= today &&
-                m.MealDate < tomorrow);
-
-            if (exists)
+            try
             {
-                return BadRequest(new { message = "Meal already taken today" });
-            }
+                var today = DateTime.Now.Date;
+                var tomorrow = today.AddDays(1);
 
-            foreach (var foodId in dto.FoodIds)
-            {
-                _context.MealRecords.Add(new MealRecord
+                var exists = await _context.MealRecords.AnyAsync(m =>
+                    m.EmployeeId == dto.EmployeeId &&
+                    m.MealTypeId == dto.MealTypeId &&
+                    m.MealDate >= today &&
+                    m.MealDate < tomorrow);
+
+                if (exists)
                 {
-                    EmployeeId = dto.EmployeeId,
-                    MealTypeId = dto.MealTypeId,
-                    FoodId = foodId,
-                    MealDate = DateTime.Now // ✅ FIXED
-                });
+                    return BadRequest(new { message = "Meal already taken today" });
+                }
+
+                // 🔥 SAFE LOOP
+                foreach (var foodId in dto.FoodIds)
+                {
+                    var foodExists = await _context.FoodItems.AnyAsync(f => f.FoodId == foodId);
+
+                    if (!foodExists)
+                    {
+                        return BadRequest($"Invalid FoodId: {foodId}");
+                    }
+
+                    _context.MealRecords.Add(new MealRecord
+                    {
+                        EmployeeId = dto.EmployeeId,
+                        MealTypeId = dto.MealTypeId,
+                        FoodId = foodId,
+                        MealDate = DateTime.Now
+                    });
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Meal Added Successfully" });
             }
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Meal Added Successfully" });
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.InnerException?.Message ?? ex.Message);
+            }
         }
-
-        // ✅ PLATE COUNT FIX
+     
         [HttpGet("TodayTotalPlates")]
         public IActionResult TodayTotalPlates()
         {
@@ -66,7 +79,7 @@ namespace MealManagement.Controllers
             return Ok(total);
         }
 
-        // ✅ AMOUNT FIX
+
         [HttpGet("TodayTotalAmount")]
         public IActionResult TodayTotalAmount()
         {
