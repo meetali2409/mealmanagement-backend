@@ -117,5 +117,56 @@ namespace MealManagement.Controllers
 
             return Ok(new { records, totalAmount });
         }
+        [HttpGet("History")]
+        public IActionResult GetAllHistory(
+    DateTime? fromDate,
+    DateTime? toDate,
+    string? name,
+    int? mealTypeId)
+        {
+            var query = _context.MealRecords
+                .Include(r => r.Employee)
+                .Include(r => r.MealType)
+                .Include(r => r.FoodItem)
+                .AsQueryable();
+
+            if (fromDate.HasValue)
+                query = query.Where(r => r.MealDate >= fromDate.Value);
+
+            if (toDate.HasValue)
+                query = query.Where(r => r.MealDate <= toDate.Value);
+
+            if (!string.IsNullOrEmpty(name))
+                query = query.Where(r => r.Employee.FullName.Contains(name));
+
+            if (mealTypeId.HasValue)
+                query = query.Where(r => r.MealTypeId == mealTypeId.Value);
+
+            var data = query.ToList();
+
+            var grouped = data
+                .GroupBy(r => new
+                {
+                    Date = r.MealDate.ToString("yyyy-MM-dd"),
+                    r.EmployeeId,
+                    r.MealTypeId
+                })
+                .Select(g => new
+                {
+                    employeeId = g.First().EmployeeId,
+                    fullName = g.First().Employee.FullName,
+                    mealDate = g.First().MealDate,
+                    mealName = g.First().MealType.MealName,
+                    foodNames = g.Select(x => x.FoodItem.FoodName).Distinct().ToList(),
+                    fixedPrice = g.First().MealType.FixedPrice,
+                    mealTypeId = g.First().MealTypeId
+                })
+                .OrderByDescending(x => x.mealDate)
+                .ToList();
+
+            var totalAmount = grouped.Sum(x => x.fixedPrice);
+
+            return Ok(new { records = grouped, totalAmount });
+        }
     }
 }
