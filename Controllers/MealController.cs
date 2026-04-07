@@ -100,15 +100,17 @@ namespace MealManagement.Controllers
             var records = _context.MealRecords
                 .Include(r => r.MealType)
                 .Include(r => r.FoodItem)
-                .Where(r => r.EmployeeId == employeeId) 
-                .OrderByDescending(r => r.MealDate)
-                .Select(r => new
+                .Where(r => r.EmployeeId == employeeId)
+                .AsEnumerable() 
+                .GroupBy(r => new { r.MealDate.Date, r.MealTypeId })
+                .Select(g => new
                 {
-                    mealDate = r.MealDate,
-                    mealName = r.MealType.MealName,
-                    foodNames = new List<string> { r.FoodItem.FoodName },
-                    fixedPrice = r.MealType.FixedPrice
+                    mealDate = g.Key.Date,
+                    mealName = g.First().MealType.MealName,
+                    foodNames = g.Select(x => x.FoodItem.FoodName).Distinct().ToList(),
+                    fixedPrice = g.First().MealType.FixedPrice
                 })
+                .OrderByDescending(x => x.mealDate)
                 .ToList();
 
             var totalAmount = records.Sum(r => r.fixedPrice);
