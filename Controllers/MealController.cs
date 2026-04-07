@@ -21,7 +21,7 @@ namespace MealManagement.Controllers
         {
             try
             {
-                var today = DateTime.Now.Date;
+                var today = DateTime.UtcNow.Date;
                 var tomorrow = today.AddDays(1);
 
                 var exists = await _context.MealRecords.AnyAsync(m =>
@@ -35,7 +35,6 @@ namespace MealManagement.Controllers
                     return BadRequest(new { message = "Meal already taken today" });
                 }
 
-                // 🔥 SAFE LOOP
                 foreach (var foodId in dto.FoodIds)
                 {
                     var foodExists = await _context.FoodItems.AnyAsync(f => f.FoodId == foodId);
@@ -50,7 +49,7 @@ namespace MealManagement.Controllers
                         EmployeeId = dto.EmployeeId,
                         MealTypeId = dto.MealTypeId,
                         FoodId = foodId,
-                        MealDate = DateTime.Now
+                        MealDate = DateTime.UtcNow
                     });
                 }
 
@@ -63,11 +62,11 @@ namespace MealManagement.Controllers
                 return StatusCode(500, ex.InnerException?.Message ?? ex.Message);
             }
         }
-     
+
         [HttpGet("TodayTotalPlates")]
         public IActionResult TodayTotalPlates()
         {
-            var today = DateTime.Now.Date;
+            var today = DateTime.UtcNow.Date;
             var tomorrow = today.AddDays(1);
 
             var total = _context.MealRecords
@@ -79,11 +78,10 @@ namespace MealManagement.Controllers
             return Ok(total);
         }
 
-
         [HttpGet("TodayTotalAmount")]
         public IActionResult TodayTotalAmount()
         {
-            var today = DateTime.Now.Date;
+            var today = DateTime.UtcNow.Date;
             var tomorrow = today.AddDays(1);
 
             var total = _context.MealRecords
