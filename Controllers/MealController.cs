@@ -93,5 +93,27 @@ namespace MealManagement.Controllers
 
             return Ok(total);
         }
+
+        [HttpGet("History/{employeeId}")]
+        public IActionResult GetHistory(int employeeId)
+        {
+            var records = _context.MealRecords
+                .Include(r => r.MealType)
+                .Include(r => r.FoodItem)
+                .Where(r => r.EmployeeId == employeeId) 
+                .OrderByDescending(r => r.MealDate)
+                .Select(r => new
+                {
+                    mealDate = r.MealDate,
+                    mealName = r.MealType.MealName,
+                    foodNames = new List<string> { r.FoodItem.FoodName },
+                    fixedPrice = r.MealType.FixedPrice
+                })
+                .ToList();
+
+            var totalAmount = records.Sum(r => r.fixedPrice);
+
+            return Ok(new { records, totalAmount });
+        }
     }
 }
