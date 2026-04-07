@@ -151,24 +151,24 @@ namespace MealManagement.Controllers
             var data = query.ToList();
 
             var grouped = data
-                .GroupBy(r => new
-                {
-                    Date = r.MealDate.ToString("yyyy-MM-dd"),
-                    r.EmployeeId,
-                    r.MealTypeId
-                })
-                .Select(g => new
-                {
-                    employeeId = g.First().EmployeeId,
-                    fullName = g.First().Employee.FullName,
-                    mealDate = g.First().MealDate,
-                    mealName = g.First().MealType.MealName,
-                    foodNames = g.Select(x => x.FoodItem.FoodName).Distinct().ToList(),
-                    fixedPrice = g.First().MealType.FixedPrice,
-                    mealTypeId = g.First().MealTypeId
-                })
-                .OrderByDescending(x => x.mealDate)
-                .ToList();
+            .GroupBy(r => new
+            {
+                Date = r.MealDate.Date,   
+                r.EmployeeId,
+                r.MealTypeId
+            })
+            .Select(g => new
+            {
+                employeeId = g.First().EmployeeId,
+                fullName = g.First().Employee.FullName,
+                mealDate = g.First().MealDate,
+                mealName = g.First().MealType.MealName,
+                foodNames = g.Select(x => x.FoodItem.FoodName).Distinct().ToList(),
+                fixedPrice = g.First().MealType.FixedPrice,
+                mealTypeId = g.First().MealTypeId
+            })
+            .OrderByDescending(x => x.mealDate)
+            .ToList();
 
             var totalAmount = grouped.Sum(x => x.fixedPrice);
 
