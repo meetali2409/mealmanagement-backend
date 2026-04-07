@@ -119,10 +119,10 @@ namespace MealManagement.Controllers
         }
         [HttpGet("History")]
         public IActionResult GetAllHistory(
-    DateTime? fromDate,
-    DateTime? toDate,
-    string? name,
-    int? mealTypeId)
+        DateTime? fromDate,
+        DateTime? toDate,
+        string? name,
+        int? mealTypeId)
         {
             var query = _context.MealRecords
                 .Include(r => r.Employee)
@@ -131,10 +131,16 @@ namespace MealManagement.Controllers
                 .AsQueryable();
 
             if (fromDate.HasValue)
-                query = query.Where(r => r.MealDate >= fromDate.Value);
+            {
+                var from = DateTime.SpecifyKind(fromDate.Value.Date, DateTimeKind.Utc);
+                query = query.Where(r => r.MealDate >= from);
+            }
 
             if (toDate.HasValue)
-                query = query.Where(r => r.MealDate <= toDate.Value);
+            {
+                var to = DateTime.SpecifyKind(toDate.Value.Date.AddDays(1), DateTimeKind.Utc);
+                query = query.Where(r => r.MealDate < to);
+            }
 
             if (!string.IsNullOrEmpty(name))
                 query = query.Where(r => r.Employee.FullName.Contains(name));
