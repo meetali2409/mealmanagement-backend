@@ -124,55 +124,65 @@ namespace MealManagement.Controllers
         string? name,
         int? mealTypeId)
         {
-            var query = _context.MealRecords
-                .Include(r => r.Employee)
-                .Include(r => r.MealType)
-                .Include(r => r.FoodItem)
-                .AsQueryable();
-
-            if (fromDate.HasValue)
+            try
             {
-                var from = DateTime.SpecifyKind(fromDate.Value.Date, DateTimeKind.Utc);
-                query = query.Where(r => r.MealDate >= from);
+                var query = _context.MealRecords
+                    .Include(r => r.Employee)
+                    .Include(r => r.MealType)
+                    .Include(r => r.FoodItem)
+                    .AsQueryable();
+
+                if (fromDate.HasValue)
+                {
+                    var from = fromDate.Value.Date;
+                    query = query.Where(r => r.MealDate >= from);
+                }
+
+                if (toDate.HasValue)
+                {
+                    var to = toDate.Value.Date.AddDays(1);
+                    query = query.Where(r => r.MealDate < to);
+                }
+
+                if (!string.IsNullOrEmpty(name))
+                    query = query.Where(r => r.Employee.FullName.Contains(name));
+
+                if (mealTypeId.HasValue)
+                    query = query.Where(r => r.MealTypeId == mealTypeId.Value);
+
+                var data = query.ToList(); 
+                var grouped = data
+                    .GroupBy(r => new
+                    {
+                        Date = r.MealDate.Date,
+                        r.EmployeeId,
+                        r.MealTypeId
+                    })
+                    .Select(g => new
+                    {
+                        employeeId = g.First().EmployeeId,
+                        fullName = g.First().Employee?.FullName ?? "",
+                        mealDate = g.First().MealDate,
+                        mealName = g.First().MealType?.MealName ?? "",
+                        foodNames = g
+                            .Where(x => x.FoodItem != null)
+                            .Select(x => x.FoodItem.FoodName)
+                            .Distinct()
+                            .ToList(),
+                        fixedPrice = g.First().MealType?.FixedPrice ?? 0,
+                        mealTypeId = g.First().MealTypeId
+                    })
+                    .OrderByDescending(x => x.mealDate)
+                    .ToList();
+
+                var totalAmount = grouped.Sum(x => x.fixedPrice);
+
+                return Ok(new { records = grouped, totalAmount });
             }
-
-            if (toDate.HasValue)
+            catch (Exception ex)
             {
-                var to = DateTime.SpecifyKind(toDate.Value.Date.AddDays(1), DateTimeKind.Utc);
-                query = query.Where(r => r.MealDate < to);
+                return StatusCode(500, ex.Message); 
             }
-
-            if (!string.IsNullOrEmpty(name))
-                query = query.Where(r => r.Employee.FullName.Contains(name));
-
-            if (mealTypeId.HasValue)
-                query = query.Where(r => r.MealTypeId == mealTypeId.Value);
-
-            var data = query.ToList();
-
-            var grouped = data
-            .GroupBy(r => new
-            {
-                Date = r.MealDate.Date,   
-                r.EmployeeId,
-                r.MealTypeId
-            })
-            .Select(g => new
-            {
-                employeeId = g.First().EmployeeId,
-                fullName = g.First().Employee.FullName,
-                mealDate = g.First().MealDate,
-                mealName = g.First().MealType.MealName,
-                foodNames = g.Select(x => x.FoodItem.FoodName).Distinct().ToList(),
-                fixedPrice = g.First().MealType.FixedPrice,
-                mealTypeId = g.First().MealTypeId
-            })
-            .OrderByDescending(x => x.mealDate)
-            .ToList();
-
-            var totalAmount = grouped.Sum(x => x.fixedPrice);
-
-            return Ok(new { records = grouped, totalAmount });
         }
     }
 }
