@@ -124,8 +124,8 @@ namespace MealManagement.Controllers
                 .ToList();
 
             _context.MealRecords.RemoveRange(meals);
-
             _context.Employees.Remove(employee);
+
             _context.SaveChanges();
 
             return Ok("Deleted Successfully");
