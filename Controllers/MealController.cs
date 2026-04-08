@@ -124,67 +124,66 @@ namespace MealManagement.Controllers
         string? name,
         int? mealTypeId)
         {
-            try
+            var query = _context.MealRecords
+                .Include(r => r.Employee)
+                .Include(r => r.MealType)
+                .Include(r => r.FoodItem)
+                .AsQueryable();
+
+            if (fromDate.HasValue)
             {
-                var query = _context.MealRecords
-                    .Include(r => r.Employee)
-                    .Include(r => r.MealType)
-                    .Include(r => r.FoodItem)
-                    .AsQueryable();
-
-                if (fromDate.HasValue)
-                {
-                    var from = fromDate.Value.Date;
-                    query = query.Where(r => r.MealDate >= from);
-                }
-
-                if (toDate.HasValue)
-                {
-                    var to = toDate.Value.Date.AddDays(1);
-                    query = query.Where(r => r.MealDate < to);
-                }
-
-                if (!string.IsNullOrEmpty(name))
-                    query = query.Where(r => r.Employee.FullName.Contains(name));
-
-                if (mealTypeId.HasValue)
-                    query = query.Where(r => r.MealTypeId == mealTypeId.Value);
-
-                var data = query.ToList();
-                var grouped = data
-                 .GroupBy(r => new
-                 {
-                     Date = r.MealDate.Date,
-                     r.EmployeeId,
-                     r.MealTypeId
-                 })
-                 .Select(g => new
-                 {
-                     employeeId = g.First().EmployeeId,
-                     fullName = g.First().Employee.FullName,
-                     mealDate = g.First().MealDate,
-                     mealName = g.First().MealType.MealName,
-
-                     foodNames = g
-                         .Where(x => x.FoodItem != null)
-                         .Select(x => x.FoodItem.FoodName)
-                         .Distinct()
-                         .ToList(),
-
-                     fixedPrice = g.First().MealType.FixedPrice,
-                     mealTypeId = g.First().MealTypeId
-                 })
-                 .OrderByDescending(x => x.mealDate)
-                 .ToList();
-
-                var totalAmount = grouped.Sum(x => x.fixedPrice);
-
-                return Ok(new { records = grouped, totalAmount });
+                var from = fromDate.Value.Date;
+                query = query.Where(r => r.MealDate >= from);
             }
-            catch (Exception ex)
+
+            if (toDate.HasValue)
             {
-                return StatusCode(500, ex.Message); 
+                var to = toDate.Value.Date.AddDays(1);
+                query = query.Where(r => r.MealDate < to);
             }
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                var lower = name.ToLower();
+                query = query.Where(r =>
+                    r.Employee.FullName.ToLower().Contains(lower)
+                );
+            }
+
+            if (mealTypeId.HasValue)
+            {
+                query = query.Where(r => r.MealTypeId == mealTypeId.Value);
+            }
+
+            var data = query.ToList();
+
+            var grouped = data
+                .GroupBy(r => new
+                {
+                    Date = r.MealDate.Date,
+                    r.EmployeeId,
+                    r.MealTypeId
+                })
+                .Select(g => new
+                {
+                    employeeId = g.First().EmployeeId,
+                    fullName = g.First().Employee.FullName,
+                    mealDate = g.First().MealDate,
+                    mealName = g.First().MealType.MealName,
+                    foodNames = g
+                        .Where(x => x.FoodItem != null)
+                        .Select(x => x.FoodItem.FoodName)
+                        .Distinct()
+                        .ToList(),
+                    fixedPrice = g.First().MealType.FixedPrice,
+                    mealTypeId = g.First().MealTypeId
+                })
+                .OrderByDescending(x => x.mealDate)
+                .ToList();
+
+            var totalAmount = grouped.Sum(x => x.fixedPrice);
+
+            return Ok(new { records = grouped, totalAmount });
         }
         [HttpDelete("Delete")]
         public IActionResult DeleteMeal(int employeeId, int mealTypeId, DateTime mealDate)
