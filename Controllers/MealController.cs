@@ -31,19 +31,10 @@ namespace MealManagement.Controllers
                     m.MealDate < tomorrow);
 
                 if (exists)
-                {
                     return BadRequest(new { message = "Meal already taken today" });
-                }
 
                 foreach (var foodId in dto.FoodIds)
                 {
-                    var foodExists = await _context.FoodItems.AnyAsync(f => f.FoodId == foodId);
-
-                    if (!foodExists)
-                    {
-                        return BadRequest($"Invalid FoodId: {foodId}");
-                    }
-
                     _context.MealRecords.Add(new MealRecord
                     {
                         EmployeeId = dto.EmployeeId,
@@ -59,7 +50,7 @@ namespace MealManagement.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.InnerException?.Message ?? ex.Message);
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -94,35 +85,12 @@ namespace MealManagement.Controllers
             return Ok(total);
         }
 
-        [HttpGet("History/{employeeId}")]
-        public IActionResult GetHistory(int employeeId)
-        {
-            var records = _context.MealRecords
-                .Include(r => r.MealType)
-                .Include(r => r.FoodItem)
-                .Where(r => r.EmployeeId == employeeId)
-                .AsEnumerable() 
-                .GroupBy(r => new { r.MealDate.Date, r.MealTypeId })
-                .Select(g => new
-                {
-                    mealDate = g.Key.Date,
-                    mealName = g.First().MealType.MealName,
-                    foodNames = g.Select(x => x.FoodItem.FoodName).Distinct().ToList(),
-                    fixedPrice = g.First().MealType.FixedPrice
-                })
-                .OrderByDescending(x => x.mealDate)
-                .ToList();
-
-            var totalAmount = records.Sum(r => r.fixedPrice);
-
-            return Ok(new { records, totalAmount });
-        }
         [HttpGet("History")]
         public IActionResult GetAllHistory(
-        DateTime? fromDate,
-        DateTime? toDate,
-        string? name,
-        int? mealTypeId)
+            DateTime? fromDate,
+            DateTime? toDate,
+            string? name,
+            int? mealTypeId)
         {
             var query = _context.MealRecords
                 .Include(r => r.Employee)
@@ -144,9 +112,9 @@ namespace MealManagement.Controllers
 
             if (!string.IsNullOrEmpty(name))
             {
-                var lower = name.ToLower();
                 query = query.Where(r =>
-                    r.Employee.FullName.ToLower().Contains(lower)
+                    r.Employee != null &&
+                    EF.Functions.ILike(r.Employee.FullName, $"%{name}%")
                 );
             }
 
@@ -167,15 +135,17 @@ namespace MealManagement.Controllers
                 .Select(g => new
                 {
                     employeeId = g.First().EmployeeId,
-                    fullName = g.First().Employee.FullName,
+                    fullName = g.First().Employee?.FullName ?? "",
                     mealDate = g.First().MealDate,
-                    mealName = g.First().MealType.MealName,
+                    mealName = g.First().MealType?.MealName ?? "",
+
                     foodNames = g
                         .Where(x => x.FoodItem != null)
                         .Select(x => x.FoodItem.FoodName)
                         .Distinct()
                         .ToList(),
-                    fixedPrice = g.First().MealType.FixedPrice,
+
+                    fixedPrice = g.First().MealType?.FixedPrice ?? 0,
                     mealTypeId = g.First().MealTypeId
                 })
                 .OrderByDescending(x => x.mealDate)
@@ -185,6 +155,7 @@ namespace MealManagement.Controllers
 
             return Ok(new { records = grouped, totalAmount });
         }
+
         [HttpDelete("Delete")]
         public IActionResult DeleteMeal(int employeeId, int mealTypeId, DateTime mealDate)
         {
