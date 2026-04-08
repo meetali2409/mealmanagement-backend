@@ -184,5 +184,22 @@ namespace MealManagement.Controllers
                 return StatusCode(500, ex.Message); 
             }
         }
+        [HttpDelete("Delete")]
+        public IActionResult DeleteMeal(int employeeId, int mealTypeId, DateTime mealDate)
+        {
+            var records = _context.MealRecords
+                .Where(r => r.EmployeeId == employeeId &&
+                            r.MealTypeId == mealTypeId &&
+                            r.MealDate.Date == mealDate.Date)
+                .ToList();
+
+            if (!records.Any())
+                return NotFound("No record");
+
+            _context.MealRecords.RemoveRange(records);
+            _context.SaveChanges();
+
+            return Ok("Deleted");
+        }
     }
 }
