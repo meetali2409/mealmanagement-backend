@@ -119,10 +119,16 @@ namespace MealManagement.Controllers
             if (employee == null)
                 return NotFound("Employee Not Found");
 
+            var meals = _context.MealRecords
+                .Where(m => m.EmployeeId == id)
+                .ToList();
+
+            _context.MealRecords.RemoveRange(meals);
+
             _context.Employees.Remove(employee);
             _context.SaveChanges();
 
-            return Ok("Employee Deleted");
+            return Ok("Deleted Successfully");
         }
     }
 }
