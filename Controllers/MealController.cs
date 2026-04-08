@@ -150,30 +150,32 @@ namespace MealManagement.Controllers
                 if (mealTypeId.HasValue)
                     query = query.Where(r => r.MealTypeId == mealTypeId.Value);
 
-                var data = query.ToList(); 
+                var data = query.ToList();
                 var grouped = data
-                    .GroupBy(r => new
-                    {
-                        Date = r.MealDate.Date,
-                        r.EmployeeId,
-                        r.MealTypeId
-                    })
-                    .Select(g => new
-                    {
-                        employeeId = g.First().EmployeeId,
-                        fullName = g.First().Employee?.FullName ?? "",
-                        mealDate = g.First().MealDate,
-                        mealName = g.First().MealType?.MealName ?? "",
-                        foodNames = g
-                            .Where(x => x.FoodItem != null)
-                            .Select(x => x.FoodItem.FoodName)
-                            .Distinct()
-                            .ToList(),
-                        fixedPrice = g.First().MealType?.FixedPrice ?? 0,
-                        mealTypeId = g.First().MealTypeId
-                    })
-                    .OrderByDescending(x => x.mealDate)
-                    .ToList();
+                 .GroupBy(r => new
+                 {
+                     Date = r.MealDate.Date,
+                     r.EmployeeId,
+                     r.MealTypeId
+                 })
+                 .Select(g => new
+                 {
+                     employeeId = g.First().EmployeeId,
+                     fullName = g.First().Employee.FullName,
+                     mealDate = g.First().MealDate,
+                     mealName = g.First().MealType.MealName,
+
+                     foodNames = g
+                         .Where(x => x.FoodItem != null)
+                         .Select(x => x.FoodItem.FoodName)
+                         .Distinct()
+                         .ToList(),
+
+                     fixedPrice = g.First().MealType.FixedPrice,
+                     mealTypeId = g.First().MealTypeId
+                 })
+                 .OrderByDescending(x => x.mealDate)
+                 .ToList();
 
                 var totalAmount = grouped.Sum(x => x.fixedPrice);
 

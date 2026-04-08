@@ -16,6 +16,7 @@ public class MealRecord
 
         public Employee? Employee { get; set; }
         public MealType? MealType { get; set; }
+        [ForeignKey("FoodId")]
         public FoodItem? FoodItem { get; set; }
     }
 }
