@@ -101,13 +101,13 @@ namespace MealManagement.Controllers
             if (fromDate.HasValue)
             {
                 var from = fromDate.Value.Date;
-                query = query.Where(r => r.MealDate >= from);
+                query = query.Where(r => r.MealDate.Date >= from);
             }
 
             if (toDate.HasValue)
             {
-                var to = toDate.Value.Date.AddDays(1);
-                query = query.Where(r => r.MealDate < to);
+                var to = toDate.Value.Date;
+                query = query.Where(r => r.MealDate.Date <= to);
             }
 
             if (!string.IsNullOrEmpty(name))
