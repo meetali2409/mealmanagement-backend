@@ -114,7 +114,7 @@ namespace MealManagement.Controllers
             {
                 query = query.Where(r =>
                     r.Employee != null &&
-                    EF.Functions.ILike(r.Employee.FullName, $"%{name}%")
+                    r.Employee.FullName.Contains(name) 
                 );
             }
 
@@ -155,7 +155,43 @@ namespace MealManagement.Controllers
 
             return Ok(new { records = grouped, totalAmount });
         }
+        [HttpGet("MyHistory/{employeeId}")]
+        public IActionResult GetMyHistory(int employeeId)
+        {
+            var data = _context.MealRecords
+                .Include(r => r.MealType)
+                .Include(r => r.FoodItem)
+                .Where(r => r.EmployeeId == employeeId)
+                .ToList();
 
+            var grouped = data
+                .GroupBy(r => new
+                {
+                    Date = r.MealDate.Date,
+                    r.EmployeeId,
+                    r.MealTypeId
+                })
+                .Select(g => new
+                {
+                    employeeId = g.First().EmployeeId,
+                    mealDate = g.First().MealDate,
+                    mealName = g.First().MealType?.MealName ?? "",
+
+                    foodNames = g
+                        .Where(x => x.FoodItem != null)
+                        .Select(x => x.FoodItem.FoodName)
+                        .Distinct()
+                        .ToList(),
+
+                    fixedPrice = g.First().MealType?.FixedPrice ?? 0
+                })
+                .OrderByDescending(x => x.mealDate)
+                .ToList();
+
+            var totalAmount = grouped.Sum(x => x.fixedPrice);
+
+            return Ok(new { records = grouped, totalAmount });
+        }
         [HttpDelete("Delete")]
         public IActionResult DeleteMeal(int employeeId, int mealTypeId, DateTime mealDate)
         {

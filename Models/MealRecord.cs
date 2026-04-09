@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MealManagement.Models
 {
- 
-public class MealRecord
+
+    public class MealRecord
     {
         public int Id { get; set; }
 
@@ -16,7 +16,7 @@ public class MealRecord
 
         public Employee? Employee { get; set; }
         public MealType? MealType { get; set; }
-        [ForeignKey("FoodId")]
-        public FoodItem? FoodItem { get; set; }
+
+        public FoodItem? FoodItem { get; set; } 
     }
 }

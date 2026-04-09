@@ -46,7 +46,7 @@ namespace MealManagement.Controllers
         {
             var meals = await _context.MealTypes.ToListAsync();
 
-            return Ok(meals); // frontend already expects array ✔
+            return Ok(meals); 
         }
 
         [HttpPut("Update/{id}")]

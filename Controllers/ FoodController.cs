@@ -98,6 +98,11 @@ namespace MealManagement.Controllers
 
             if (food == null)
                 return NotFound("Food not found");
+            var isUsed = await _context.MealRecords
+                .AnyAsync(m => m.FoodId == id);
+
+            if (isUsed)
+                return BadRequest(" Food is used in records, cannot delete");
 
             _context.FoodItems.Remove(food);
             await _context.SaveChangesAsync();
