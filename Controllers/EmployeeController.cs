@@ -15,37 +15,54 @@ namespace MealManagement.Controllers
         {
             _context = context;
         }
+        [HttpGet("test")]
+        public IActionResult Test()
+        {
+            return Ok("API Working");
+        }
         [HttpPost("Register")]
         public IActionResult Register([FromBody] Employee emp)
         {
-            if (string.IsNullOrWhiteSpace(emp.FullName) ||
-                string.IsNullOrWhiteSpace(emp.Password) ||
-                string.IsNullOrWhiteSpace(emp.Email))
+            try
             {
-                return BadRequest("Name, Email and Password required");
+                if (string.IsNullOrWhiteSpace(emp.FullName) ||
+                    string.IsNullOrWhiteSpace(emp.Password) ||
+                    string.IsNullOrWhiteSpace(emp.Email))
+                {
+                    return BadRequest(new { message = "Name, Email and Password required" });
+                }
+
+                var existingUser = _context.Employees
+                    .FirstOrDefault(e => e.Email == emp.Email);
+
+                if (existingUser != null)
+                {
+                    return BadRequest(new { message = "Email already registered" });
+                }
+
+                if (string.IsNullOrEmpty(emp.Role))
+                    emp.Role = "User";
+
+                _context.Employees.Add(emp);
+                _context.SaveChanges();
+
+                return Ok(new
+                {
+                    message = "Registered Successfully",
+                    emp.EmployeeId,
+                    emp.FullName,
+                    emp.Email,
+                    emp.Role
+                });
             }
-
-            var existingUser = _context.Employees
-                .FirstOrDefault(e => e.Email == emp.Email);
-
-            if (existingUser != null)
+            catch (Exception ex)
             {
-                return BadRequest("Email already registered");
+                return StatusCode(500, new
+                {
+                    message = "Server error",
+                    error = ex.Message
+                });
             }
-            if (string.IsNullOrEmpty(emp.Role))
-                emp.Role = "User";
-
-            _context.Employees.Add(emp);
-            _context.SaveChanges();
-
-            return Ok(new
-            {
-                message = "Registered Successfully",
-                emp.EmployeeId,
-                emp.FullName,
-                emp.Email,
-                emp.Role
-            });
         }
         [HttpPost("Login")]
         public IActionResult Login(LoginDto model)
