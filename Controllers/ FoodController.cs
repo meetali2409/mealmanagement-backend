@@ -33,7 +33,7 @@ namespace MealManagement.Controllers
             };
 
             await _context.FoodItems.AddAsync(food);
-            await _context.SaveChangesAsync();
+            //await _context.SaveChangesAsync();
 
             return Ok(new
             {

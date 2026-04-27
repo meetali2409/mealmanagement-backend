@@ -18,4 +18,4 @@ namespace MealManagement.Models
 
         public string Role { get; set; } = "User";
     }
-}
+} 
