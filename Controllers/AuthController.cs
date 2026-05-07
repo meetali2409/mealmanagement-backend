@@ -101,9 +101,10 @@ namespace MealManagement.Controllers
             }
 
             var token = _jwtService.GenerateToken(
-                user.Email,
-                user.EmployeeId
-            );
+                    user.Email,
+                    user.EmployeeId,
+                    user.Role
+);
 
             return Ok(new
             {

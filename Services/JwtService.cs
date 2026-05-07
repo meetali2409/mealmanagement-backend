@@ -14,7 +14,10 @@ namespace MealManagement.Services
             _configuration = configuration;
         }
 
-        public string GenerateToken(string email, int employeeId)
+        public string GenerateToken(
+            string email,
+            int employeeId,
+            string role)
         {
             var jwtKey = _configuration["Jwt:Key"];
 
@@ -35,7 +38,13 @@ namespace MealManagement.Services
             var claims = new[]
             {
                 new Claim(ClaimTypes.Email, email),
-                new Claim("EmployeeId", employeeId.ToString())
+
+                new Claim(
+                    "EmployeeId",
+                    employeeId.ToString()
+                ),
+
+                new Claim(ClaimTypes.Role, role)
             };
 
             var token = new JwtSecurityToken(
@@ -46,7 +55,8 @@ namespace MealManagement.Services
                 signingCredentials: credentials
             );
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new JwtSecurityTokenHandler()
+                .WriteToken(token);
         }
     }
 }
