@@ -20,69 +20,7 @@ namespace MealManagement.Controllers
         {
             return Ok("API Working");
         }
-        [HttpPost("Register")]
-        public IActionResult Register([FromBody] Employee emp)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(emp.FullName) ||
-                    string.IsNullOrWhiteSpace(emp.Password) ||
-                    string.IsNullOrWhiteSpace(emp.Email))
-                {
-                    return BadRequest(new { message = "Name, Email and Password required" });
-                }
-
-                var existingUser = _context.Employees
-                    .FirstOrDefault(e => e.Email == emp.Email);
-
-                if (existingUser != null)
-                {
-                    return BadRequest(new { message = "Email already registered" });
-                }
-
-                if (string.IsNullOrEmpty(emp.Role))
-                    emp.Role = "User";
-
-                _context.Employees.Add(emp);
-                _context.SaveChanges();
-
-                return Ok(new
-                {
-                    message = "Registered Successfully",
-                    emp.EmployeeId,
-                    emp.FullName,
-                    emp.Email,
-                    emp.Role
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    message = "Server error",
-                    error = ex.Message
-                });
-            }
-        }
-        [HttpPost("Login")]
-        public IActionResult Login(LoginDto model)
-        {
-            var user = _context.Employees
-                .FirstOrDefault(x =>
-                    x.Email == model.Email &&
-                    x.Password == model.Password);
-
-            if (user == null)
-                return Unauthorized("Invalid Credentials");
-
-            return Ok(new
-            {
-                user.EmployeeId,
-                user.FullName,
-                user.Email,
-                user.Role  
-            });
-        }
+       
         [HttpPost("Add")]
         public IActionResult AddEmployee(EmployeeDto dto)
         {
