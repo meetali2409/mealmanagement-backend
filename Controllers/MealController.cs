@@ -21,6 +21,22 @@ namespace MealManagement.Controllers
         {
             try
             {
+                if (dto.EmployeeId <= 0)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Invalid EmployeeId"
+                    });
+                }
+
+                if (dto.FoodIds == null || !dto.FoodIds.Any())
+                {
+                    return BadRequest(new
+                    {
+                        message = "Please select food items"
+                    });
+                }
+
                 var today = DateTime.UtcNow.Date;
                 var tomorrow = today.AddDays(1);
 
@@ -31,7 +47,12 @@ namespace MealManagement.Controllers
                     m.MealDate < tomorrow);
 
                 if (exists)
-                    return BadRequest(new { message = "Meal already taken today" });
+                {
+                    return BadRequest(new
+                    {
+                        message = "Meal already taken today"
+                    });
+                }
 
                 foreach (var foodId in dto.FoodIds)
                 {
@@ -46,11 +67,19 @@ namespace MealManagement.Controllers
 
                 await _context.SaveChangesAsync();
 
-                return Ok(new { message = "Meal Added Successfully" });
+                return Ok(new
+                {
+                    message = "Meal Added Successfully"
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    inner = ex.InnerException?.Message,
+                    fullError = ex.ToString()
+                });
             }
         }
 

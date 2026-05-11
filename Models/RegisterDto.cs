@@ -12,5 +12,10 @@ namespace MealManagement.Models
 
         [Required]
         public string Password { get; set; }
+
+        [Required]
+        public string Role { get; set; }
+
+        public string? Otp { get; set; }
     }
 }

@@ -19,15 +19,37 @@ namespace MealManagement.Controllers
         }
 
         [AllowAnonymous]
+        [HttpGet("dbtest")]
+        public IActionResult DbTest()
+        {
+            try
+            {
+                _context.Database.CanConnect();
+
+                return Ok(
+                    "Database Connected Successfully"
+                );
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(
+                    500,
+                    ex.Message
+                );
+            }
+        }
+
+        [AllowAnonymous]
         [HttpGet("test")]
         public IActionResult Test()
         {
             return Ok("API Working");
         }
 
-        [Authorize(Roles = "Admin")]
+        [AllowAnonymous]
         [HttpPost("Add")]
-        public IActionResult AddEmployee(EmployeeDto dto)
+        public IActionResult AddEmployee(
+            EmployeeDto dto)
         {
             var emp = new Employee
             {
@@ -35,23 +57,28 @@ namespace MealManagement.Controllers
             };
 
             _context.Employees.Add(emp);
+
             _context.SaveChanges();
 
             return Ok(emp);
         }
 
+        [AllowAnonymous]
         [HttpGet("All")]
         public IActionResult GetAllEmployees()
         {
-            var employees = _context.Employees.ToList();
+            var employees =
+                _context.Employees.ToList();
 
             return Ok(employees);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public IActionResult GetEmployee(int id)
         {
-            var employee = _context.Employees.Find(id);
+            var employee =
+                _context.Employees.Find(id);
 
             if (employee == null)
             {
@@ -63,13 +90,14 @@ namespace MealManagement.Controllers
             return Ok(employee);
         }
 
-        [Authorize(Roles = "Admin")]
+        [AllowAnonymous]
         [HttpPut("Update/{id}")]
         public IActionResult UpdateEmployee(
             int id,
             UpdateEmployeeDto dto)
         {
-            var employee = _context.Employees.Find(id);
+            var employee =
+                _context.Employees.Find(id);
 
             if (employee == null)
             {
@@ -78,18 +106,21 @@ namespace MealManagement.Controllers
                 );
             }
 
-            employee.FullName = dto.FullName;
+            employee.FullName =
+                dto.FullName;
 
             _context.SaveChanges();
 
             return Ok(employee);
         }
 
-        [Authorize(Roles = "Admin")]
+        [AllowAnonymous]
         [HttpDelete("{id}")]
-        public IActionResult DeleteEmployee(int id)
+        public IActionResult DeleteEmployee(
+            int id)
         {
-            var employee = _context.Employees.Find(id);
+            var employee =
+                _context.Employees.Find(id);
 
             if (employee == null)
             {
@@ -98,13 +129,16 @@ namespace MealManagement.Controllers
                 );
             }
 
-            var meals = _context.MealRecords
+            var meals =
+                _context.MealRecords
                 .Where(m => m.EmployeeId == id)
                 .ToList();
 
-            _context.MealRecords.RemoveRange(meals);
+            _context.MealRecords
+                .RemoveRange(meals);
 
-            _context.Employees.Remove(employee);
+            _context.Employees
+                .Remove(employee);
 
             _context.SaveChanges();
 

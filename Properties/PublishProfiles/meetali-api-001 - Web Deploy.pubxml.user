@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project>
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <History>True|2026-05-10T11:06:31.3484864Z||;True|2026-05-10T16:25:24.5908087+05:30||;True|2026-05-10T16:18:31.3817776+05:30||;True|2026-05-10T15:09:07.6023771+05:30||;True|2026-05-10T15:04:05.9961998+05:30||;True|2026-05-10T14:51:29.0085535+05:30||;True|2026-05-10T14:39:38.4141781+05:30||;True|2026-05-10T13:36:11.8809060+05:30||;True|2026-05-10T00:49:38.7967101+05:30||;True|2026-05-10T00:21:44.8055669+05:30||;True|2026-05-10T00:10:59.4419182+05:30||;True|2026-05-09T23:50:19.6556819+05:30||;True|2026-05-09T23:49:32.5991259+05:30||;True|2026-05-08T16:24:34.5826491+05:30||;True|2026-05-08T14:50:15.5178083+05:30||;True|2026-05-08T14:39:43.0686028+05:30||;False|2026-05-08T14:39:05.1543732+05:30||;True|2026-05-08T13:01:11.2047132+05:30||;True|2026-05-08T12:32:43.5974755+05:30||;True|2026-05-08T11:41:18.1909306+05:30||;True|2026-05-08T11:36:16.6972475+05:30||;True|2026-05-07T17:18:16.3154688+05:30||;True|2026-05-07T16:26:37.5832472+05:30||;True|2026-05-07T16:04:11.5129489+05:30||;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+  <ItemGroup>
+    <AzureDBConnectionStrings Include="REDACTED" />
+    <AzureDBConnectionStrings Include="Server=tcp:mealmanagement-server.database.windows.net,1433;Initial Catalog=mealmanagement-db-dev;User ID=mmuser;Password=usermm@9317;Encrypt=True;TrustServerCertificate=False" />
+  </ItemGroup>
+</Project>
