@@ -32,4 +32,8 @@
 	  <None Include="wwwroot\.gitignore" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="NewFolder\" />
+	</ItemGroup>
+
 </Project>
