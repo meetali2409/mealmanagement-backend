@@ -26,9 +26,9 @@
               "Title": "JwtService.cs",
               "DocumentMoniker": "C:\\Users\\lenovo\\Desktop\\MealManagement\\MealManagement\\mealmanagement-backend-main\\Services\\JwtService.cs",
               "RelativeDocumentMoniker": "Services\\JwtService.cs",
-              "ToolTip": "C:\\Users\\lenovo\\Desktop\\MealManagement\\MealManagement\\mealmanagement-backend-main\\Services\\JwtService.cs*",
-              "RelativeToolTip": "Services\\JwtService.cs*",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAAD0AAAABAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\lenovo\\Desktop\\MealManagement\\MealManagement\\mealmanagement-backend-main\\Services\\JwtService.cs",
+              "RelativeToolTip": "Services\\JwtService.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABIAAAAbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-05-18T06:28:52.964Z",
               "EditorCaption": ""
@@ -43,8 +43,7 @@
               "RelativeToolTip": "Data\\MealManagerDbContext.cs",
               "ViewState": "AgIAAA0AAAAAAAAAAAAQwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-15T05:25:35.332Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-15T05:25:35.332Z"
             }
           ]
         }
