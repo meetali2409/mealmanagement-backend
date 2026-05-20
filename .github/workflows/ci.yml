@@ -41,5 +41,5 @@ jobs:
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v3
         with:
-          app-name: github-mealmanagement-deployment
+          app-name: meetali-api-001
           package: publish
