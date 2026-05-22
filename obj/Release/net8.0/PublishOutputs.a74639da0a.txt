@@ -1,14 +1,7 @@
 C:\Users\lenovo\Desktop\MealManagement\MealManagement\mealmanagement-backend-main\bin\Release\net8.0\publish\MealManagement.exe
-C:\Users\lenovo\Desktop\MealManagement\MealManagement\mealmanagement-backend-main\bin\Release\net8.0\publish\publish\web.config
 C:\Users\lenovo\Desktop\MealManagement\MealManagement\mealmanagement-backend-main\bin\Release\net8.0\publish\appsettings.Development.json
 C:\Users\lenovo\Desktop\MealManagement\MealManagement\mealmanagement-backend-main\bin\Release\net8.0\publish\appsettings.json
 C:\Users\lenovo\Desktop\MealManagement\MealManagement\mealmanagement-backend-main\bin\Release\net8.0\publish\package-lock.json
-C:\Users\lenovo\Desktop\MealManagement\MealManagement\mealmanagement-backend-main\bin\Release\net8.0\publish\publish\appsettings.Development.json
-C:\Users\lenovo\Desktop\MealManagement\MealManagement\mealmanagement-backend-main\bin\Release\net8.0\publish\publish\appsettings.json
-C:\Users\lenovo\Desktop\MealManagement\MealManagement\mealmanagement-backend-main\bin\Release\net8.0\publish\publish\MealManagement.deps.json
-C:\Users\lenovo\Desktop\MealManagement\MealManagement\mealmanagement-backend-main\bin\Release\net8.0\publish\publish\MealManagement.runtimeconfig.json
-C:\Users\lenovo\Desktop\MealManagement\MealManagement\mealmanagement-backend-main\bin\Release\net8.0\publish\publish\MealManagement.staticwebassets.endpoints.json
-C:\Users\lenovo\Desktop\MealManagement\MealManagement\mealmanagement-backend-main\bin\Release\net8.0\publish\publish\package-lock.json
 C:\Users\lenovo\Desktop\MealManagement\MealManagement\mealmanagement-backend-main\bin\Release\net8.0\publish\MealManagement.dll
 C:\Users\lenovo\Desktop\MealManagement\MealManagement\mealmanagement-backend-main\bin\Release\net8.0\publish\MealManagement.runtimeconfig.json
 C:\Users\lenovo\Desktop\MealManagement\MealManagement\mealmanagement-backend-main\bin\Release\net8.0\publish\MealManagement.pdb
